@@ -27,7 +27,7 @@ end
 M.listNotes = function()
   local actions = require("telescope.actions")
   local actions_state = require("telescope.actions.state")
-  local finders = require("telescope.finders")
+  -- local finders = require("telescope.finders")
   local find_command = { "find", ".", "-maxdepth", "1", "-not", "-type", "d" }
 
   M.picker = require("telescope.builtin").find_files({
@@ -83,6 +83,39 @@ M.createAndOpenNoteFile = function(opts)
   end
 
   vim.cmd("edit " .. full_path)
+end
+
+M.createAndOpenJournalFile = function(opts)
+  local full_path = M.createJournalFile(opts)
+
+  if full_path == nil then
+    return
+  end
+
+  vim.cmd("edit " .. full_path)
+end
+
+---@return string|nil full_path
+M.createJournalFile = function()
+  local notes_path = vim.fn.expand(M.config.notes_dir)
+  local full_path = notes_path
+  full_path = full_path .. "journal/" .. os.date("%Y-%m-%d") .. ".md"
+
+  if vim.fn.filereadable(full_path) == 1 then
+    return full_path
+  end
+
+  local template_text = "# " .. os.date("%a %b %d %Y") .. "\n"
+
+  local file = io.open(full_path, "w")
+  if file then
+    file:write(template_text)
+    file:close()
+  else
+    vim.notify("Unable to create file " .. full_path)
+  end
+
+  return full_path
 end
 
 ---@param opts table
