@@ -24,6 +24,14 @@ M.setup = function(args)
   end
 end
 
+M.searchNotes = function()
+  require("telescope.builtin").live_grep({
+    prompt_title = "Search Notes (" .. M.config.notes_dir .. ")",
+    cwd = M.config.notes_dir,
+    disable_coordinates = true,
+  })
+end
+
 M.listNotes = function()
   local actions = require("telescope.actions")
   local actions_state = require("telescope.actions.state")
