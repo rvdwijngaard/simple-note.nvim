@@ -36,7 +36,7 @@ M.listNotes = function()
   local actions = require("telescope.actions")
   local actions_state = require("telescope.actions.state")
   -- local finders = require("telescope.finders")
-  local find_command = { "find", ".", "-maxdepth", "1", "-not", "-type", "d" }
+  local find_command = { "find", ".", "-maxdepth", "2", "-not", "-type", "d" }
 
   M.picker = require("telescope.builtin").find_files({
     cwd = M.config.notes_dir,
