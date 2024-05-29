@@ -1,10 +1,12 @@
 ---@class Config
 ---@field notes_dir string path to the directory where the notes should be created
+---@field journal_template_path string path to the daily journal template
 local config = {
   notes_dir = "~/notes/",
   telescope_new = "<C-n>",
   telescope_delete = "<C-x>",
   telescope_rename = "<C-r>",
+  journal_template_path = "/journal_template.txt",
 }
 
 ---@class MyModule
@@ -107,17 +109,29 @@ end
 M.createJournalFile = function()
   local notes_path = vim.fn.expand(M.config.notes_dir)
   local full_path = notes_path
-  full_path = full_path .. "journal/" .. os.date("%Y-%m-%d") .. ".md"
+  local current_date = os.date("%Y-%m-%d") -- Get the current date
+  full_path = full_path .. "journal/" .. current_date .. ".md"
 
   if vim.fn.filereadable(full_path) == 1 then
     return full_path
   end
 
-  local template_text = "# " .. os.date("%a %b %d %Y") .. "\n"
+  local template_path = vim.fn.stdpath("config") .. M.config.journal_template_path
+  local template_lines = vim.fn.readfile(template_path)
+  local template_content = table.concat(template_lines, "\n")
+
+  local result = string.gsub(template_content, "%{{%w+}}", function(placeholder)
+    local variable_name = placeholder:sub(3, -3) -- Extract variable name from {{placeholder}}
+    if variable_name == "date" then
+      return os.date("%a %d %b %Y")
+    else
+      return placeholder -- Return the placeholder if variable is not recognized
+    end
+  end)
 
   local file = io.open(full_path, "w")
   if file then
-    file:write(template_text)
+    file:write(result)
     file:close()
   else
     vim.notify("Unable to create file " .. full_path)
